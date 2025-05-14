@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Kart Oyunu</title>
+    <style>
+        * {
+            user-select: none; /* Metin seçimini tamamen devre dışı bırakır */
+        }
+
+        #oyun{
+            margin: 9% auto;
+            text-align: center;
+        }
+        #kutu{
+            margin: 30px auto;
+            height: 245px;
+            width: 885px;
+            background-color: rgb(58, 57, 57);
+            border: 2px solid rgba(0, 0, 0, 0.837);
+        }
+
+        .kart{
+            text-align: center;
+            line-height: 67px;
+            width: 100px;
+            height: 70px;
+            margin: 5px;
+            font-size: 28px;
+            background-color: rgb(228, 228, 51);
+            box-shadow: 0 0 12px rgb(228, 228, 51);
+            opacity: 80%;
+            border-radius: 12px;
+            float: left;
+            color: transparent; /* Başlangıçta emoji görünmeyecek */
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .kart.acik {
+            background-color: rgb(228, 228, 51);
+            color: black; /* Emoji tıklanınca görünür olacak */
+            transform: rotateY(180deg); /* Hafif dönüş efekti */
+        }
+        #oyuncu{
+            color: rgb(34, 29, 24);
+            font-size: 24px;
+        }
+        #puan1,#puan2{
+            margin-right: 23px;
+            -webkit-text-stroke: 0.5px rgb(248, 248, 167);
+            font-weight: 800;
+        }
+        #puan1{
+            color: blue;
+            font-size: 27px;
+        }
+        #puan2{
+            color: red;
+            font-size: 27px;
+        }
+        #gerial{
+            width: 450px;
+            margin-right: 15px;
+            background:linear-gradient(to right,blue,red) ;
+            border: none;
+            color: beige;
+        }
+    </style>
+</head>
+<body>
+    <div id="oyun">
+        <div>
+            <label id="oyuncu">Sıra Mavi Takımda</label>
+        </div><br><br>
+        <label id="puan1">Mavi Takım, Puanınız : 0</label><br>
+        <label id="puan2">Kırmızı Takım, Puanınız : 0</label><br>
+        <input type="button" value="Geri al" id="gerial" onclick="gerial()">
+        <div id="kutu"></div>
+    </div>
+
+        <script>
+            var sayac=0;
+            var oyuncu=1;
+    var kutu = document.getElementById("kutu");
+    var emoji = ["😊", "😂", "🤣", "😍", "😘", "😁", "😎", "😢", "😉", "🙂", "🥰", "🤗"];
+    var ikiKereEmoji = emoji.concat(emoji); // Emojilerin her biri iki kez olsun
+    ikiKereEmoji.sort(() => 0.5 - Math.random()); // Karıştırma
+    var puan1=0;
+    var puan2=0;
+    var secilen1 = null; // İlk seçilen kart
+    var secilen2 = null; // İkinci seçilen kart
+    var kartlarBloklu = false; // Kartlar kontrol edilirken tıklama engellenecek
+
+    // Tarayıcının varsayılan sürükleme/seçim davranışını engelle
+    kutu.addEventListener('mousedown', function(event) {
+        event.preventDefault();
+    });
+
+    // Kartları oluşturma
+    ikiKereEmoji.forEach(function (emoj) {
+        var kart = document.createElement("div");
+        kart.className = "kart";
+        kart.textContent = emoj;
+
+        if(oyuncu==1){
+           kutu.style.backgroundColor="Blue"; 
+        }
+        else{
+            kutu.style.backgroundColor="Red"; 
+        }
+        // Kart tıklama olayı
+        kart.addEventListener("click", function () {
+            if (kartlarBloklu || kart.classList.contains("acik")) return;
+
+            // Kart açılır
+            kart.classList.add("acik");
+
+            if (!secilen1) {
+                // İlk kart seçilir
+                secilen1 = kart;
+            } else if (!secilen2) {
+                // İkinci kart seçilir
+                secilen2 = kart;
+                kartlarBloklu = true;
+
+                // Eşleşme kontrolü
+                setTimeout(function () {
+                    if (secilen1.textContent === secilen2.textContent) {
+                        // Eşleşiyorsa kartlar açık kalır
+                        secilen1 = null;
+                        secilen2 = null;
+                        sayac++;
+                        if(oyuncu==1){
+                            puan1 += 20;
+                            document.getElementById("puan1").innerText = "Mavi Takım, Puanınız : " + puan1;    
+                            if(sayac==1){
+                                document.getElementById("oyuncu").innerText="Tebrikler Mavi Takım bildi";
+                            }
+                            else if(sayac>1)
+                            {
+                                puan1+=sayac;
+                                document.getElementById("oyuncu").innerText="Tebrikler Mavi "+sayac+" tane Takım bildi";
+                            }
+                        }
+                        else{
+                            puan2+=20;
+                            document.getElementById("puan2").innerText = "Kırmızı Takım, Puanınız : " + puan2;   
+                            if(sayac==1){
+                                document.getElementById("oyuncu").innerText="Tebrikler Kırmızı Takım bildi";
+                            }
+                            else if(sayac>1)
+                            {
+                                puan2+=sayac;
+                                document.getElementById("oyuncu").innerText="Tebrikler Kırmızı Takım "+sayac+" tane Takım bildiniz";
+
+                            } 
+                        }
+                    } else {
+                        // Eşleşmiyorsa kartlar kapanır
+                        secilen1.classList.remove("acik");
+                        secilen2.classList.remove("acik");
+                        secilen1 = null;
+                        secilen2 = null;
+                        if(oyuncu==1){
+                            document.getElementById("puan1").innerText = "Mavi Takım, Puanınız : " + puan1;    
+                            oyuncu=2;
+                            document.getElementById("oyuncu").innerText="Mavi Takım Bilemediniz \n Sıra Kırmızı Takımda";
+                            kutu.style.backgroundColor="Red"; 
+                            sayac=0;
+                        }
+                        else{
+                            document.getElementById("puan2").innerText = "Kırmızı Takım, Puanınız : " + puan2;   
+                            oyuncu=1; 
+                            document.getElementById("oyuncu").innerText="Kırmızı Takım Bilemediniz \n Sıra Mavi Takımda";
+                            kutu.style.backgroundColor="Blue"; 
+                            sayac=0;
+                        }
+                    }
+                    kartlarBloklu = false;
+                }, 700); // 1 saniye bekleme süresi
+            }
+        });
+
+        kutu.appendChild(kart);
+    });
+    var gerialSayac = 0; // Oyuncunun ardışık "geri al" sayısını tutar
+
+function gerial() {
+    // Eğer mevcut oyuncu üst üste 2 kere "geri al" yaptıysa sırayı değiştir
+    if (gerialSayac >= 1) {
+        alert("Sıra rakibe geçecektir");
+        if (oyuncu == 1) {
+            oyuncu = 2;
+            document.getElementById("oyuncu").innerText="Mavi Takım Bilemediniz \n Sıra Kırmızı Takımda";
+            kutu.style.backgroundColor="Red"; 
+        } else {
+            oyuncu = 1;
+            document.getElementById("oyuncu").innerText="Kırmızı Takım Bilemediniz \n Sıra Mavi Takımda";
+            kutu.style.backgroundColor="Blue"; 
+        }
+        gerialSayac = 0; // Sayacı sıfırla
+        sayac = 0;
+    } else {
+        // Ardışık geri al sayısını artır
+        gerialSayac++;
+    }
+
+    // Seçili kartları geri al
+    if (secilen1) {
+        secilen1.classList.remove("acik");
+        if (secilen2) {
+            secilen2.classList.remove("acik");
+        }
+        secilen1 = null;
+        secilen2 = null;
+    }
+}
+
+</script>
+
+    
+</body>
+</html>
